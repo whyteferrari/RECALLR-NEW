@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (e.target.closest('.deck-card__menu') || e.target.closest('.dropdown-menu')) return;
           localStorage.setItem("currentDeckId", deck.deck_id);
           localStorage.setItem("currentDeckName", deck.name);
-          window.location.href = "studydeck.html";
+          window.location.href = "studydecks.html";
         });
 
         decksContainer.appendChild(div);
