@@ -12,7 +12,7 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 // Use localhost for development, Render URL for production
 const API_BASE_URL = isDevelopment 
   ? 'http://localhost:3000'  // Local development
-  : 'https://funny-syrniki-4806f1.netlify.app/';  // 🔧 UPDATE THIS after deployment
+  : 'https://recallr-backend-53s9.onrender.com/';  // 🔧 UPDATE THIS after deployment
 
 // Export configuration
 const API_CONFIG = {
