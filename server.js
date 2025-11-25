@@ -8,7 +8,7 @@ app.use(cors({
   origin: [
     'http://localhost:8080',
     'http://localhost:3000',
-    'https://lovely-unicorn-241fb5.netlify.app',  // ← Put your actual Netlify URL here
+    'https://beamish-mousse-fae066.netlify.app',  // ← Put your actual Netlify URL here
   ],
   credentials: true
 }));app.use(express.json());
