@@ -8,7 +8,7 @@ app.use(cors({
   origin: [
     'http://localhost:8080',
     'http://localhost:3000',
-    'https://funny-syrniki-4806f1.netlify.app',  // ← Put your actual Netlify URL here
+    'https://lovely-unicorn-241fb5.netlify.app',  // ← Put your actual Netlify URL here
   ],
   credentials: true
 }));app.use(express.json());
