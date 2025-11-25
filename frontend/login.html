@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recallr Login</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manjari:wght@100;400;700&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="login.css" />
+  </head>
+
+  <body>
+    <div class="LOGIN">
+      <!-- Floating background blobs -->
+      <div class="blurcircle"></div>
+      <div class="blurcircle-2"></div>
+      <div class="blurcircle-3"></div>
+      <div class="blurcircle-4"></div>
+
+      <!-- Glass login card -->
+      <div class="login-card">
+        <h2>Recallr</h2>
+        <h1>Welcome Back!</h1>
+
+        <form id="loginForm">
+          <div class="input-group">
+            <label for="username">Email or Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter your email or username"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <div class="options">
+            <label><input type="checkbox" id="remember"> Remember me</label>
+            <a href="#" class="coming-soon">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="login-btn">Login</button>
+
+          <div class="signup">
+            Don't have an account? <a href="signup.html">Sign up</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ✅ IMPORTANT: Load config.js FIRST -->
+    <script src="./config.js"></script>
+    
+    <script>
+      // ==========================
+      // Elements
+      // ==========================
+      const form = document.getElementById("loginForm");
+      const usernameInput = document.getElementById("username");
+      const passwordInput = document.getElementById("password");
+      const rememberCheck = document.getElementById("remember");
+
+      // Load saved username if "Remember me" was checked
+      if (localStorage.getItem("remember") === "true") {
+        usernameInput.value = localStorage.getItem("savedUsername") || "";
+        rememberCheck.checked = true;
+      }
+
+      // ==========================
+      // Handle form submission - FIXED
+      // ==========================
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!username || !password) {
+          alert("Please enter both fields.");
+          return;
+        }
+
+        try {
+          // ✅ FIXED: Use API_CONFIG
+          const response = await fetch(API_CONFIG.ENDPOINTS.LOGIN, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error('❌ Login error:', result);
+            alert(result.message || "Login failed.");
+            return;
+          }
+
+          console.log('✅ Login successful:', result);
+
+          // Always store userId and username for the dashboard
+          localStorage.setItem("userId", result.userId);
+          localStorage.setItem("username", result.username);
+
+          // Handle "Remember me" - save username for next time
+          if (rememberCheck.checked) {
+            localStorage.setItem("remember", "true");
+            localStorage.setItem("savedUsername", username);
+          } else {
+            localStorage.removeItem("remember");
+            localStorage.removeItem("savedUsername");
+          }
+
+          alert(result.message);
+          window.location.href = "dashboard.html";
+
+        } catch (err) {
+          console.error("❌ Login error:", err);
+          alert("Error connecting to server. Please check your internet connection.");
+        }
+      });
+
+      // Coming soon alert
+      document.querySelectorAll('.coming-soon').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert('Feature coming soon!');
+        });
+      });
+    </script>
+  </body>
+</html>

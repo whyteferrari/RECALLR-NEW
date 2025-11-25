@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recallr - Edit Deck</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manjari:wght@100;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar glass">
+    <div class="sidebar__logo">Recallr</div>
+    <div class="sidebar__divider"></div>
+    <a href="adddeck.html" class="sidebar__button">Add Deck</a>
+    <a href="#" class="sidebar__button coming-soon">Add Folder</a>
+    <div class="sidebar__divider"></div>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html" class="sidebar__link">Home</a>
+      <a href="library-ongoing.html" class="sidebar__link">My Library</a>
+      <div class="sidebar__link coming-soon">Settings</div>
+      <div class="sidebar__divider"></div>
+      <div class="sidebar__link coming-soon">Public Decks</div>
+      <div class="sidebar__link coming-soon">Public Folders</div>
+      <div class="sidebar__divider"></div>
+    </nav>
+    <a href="login.html" class="sidebar__logout">Logout</a>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header__text">
+        <h1>Edit Deck Flashcards</h1>
+        <p>Add or edit flashcards for your deck!</p>
+      </div>
+    </header>
+
+    <!-- Flashcard Section -->
+    <section class="study-plan glass" id="flashcardSection">
+      <div class="study-plan__header">
+        <h2 class="study-plan__title" id="flashcardHeader">Editing Deck...</h2>
+      </div>
+      <form id="flashcardForm">
+        <div id="flashcardContainer" class="flashcard-container"></div>
+        <div class="modal__actions">
+          <button type="button" id="addAnotherFlashcard" class="btn btn--primary">+ Add Another Card</button>
+          <button type="button" id="finishFlashcards" class="btn btn--secondary">Save Changes</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- ✅ IMPORTANT: Load config.js FIRST -->
+  <script src="./config.js"></script>
+  
+  <script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // ✅ FIXED: Use checkAuth helper
+  const userId = checkAuth();
+  if (!userId) {
+    throw new Error('Not authenticated');
+  }
+
+  const deckId = localStorage.getItem("currentDeckId");
+  const deckNameStored = localStorage.getItem("currentDeckName");
+
+  if (!deckId) {
+    alert("No deck selected. Redirecting to library.");
+    window.location.href = "library-ongoing.html";
+    return;
+  }
+
+  const flashcardContainer = document.getElementById("flashcardContainer");
+  const addAnotherFlashcard = document.getElementById("addAnotherFlashcard");
+  const finishFlashcardsBtn = document.getElementById("finishFlashcards");
+  const flashcardHeader = document.getElementById("flashcardHeader");
+
+  let deckName = deckNameStored || "Untitled Deck";
+  
+  // ✅ FIXED: Use API_CONFIG to fetch deck details
+  try {
+    const deckRes = await fetch(API_CONFIG.ENDPOINTS.GET_DECK_DETAIL(deckId));
+    if (deckRes.ok) {
+      const deck = await deckRes.json();
+      if (deck.name) deckName = deck.name;
+    }
+  } catch (err) {
+    console.warn("Could not fetch deck name, using stored or default:", err);
+  }
+  
+  flashcardHeader.textContent = `Editing ${deckName}`;
+
+  let flashcards = [];
+  
+  // ✅ FIXED: Use API_CONFIG to fetch flashcards
+  try {
+    const res = await fetch(API_CONFIG.ENDPOINTS.GET_FLASHCARDS(deckId));
+    if (!res.ok) throw new Error('Failed to load flashcards');
+    
+    flashcards = await res.json();
+    console.log('✅ Loaded', flashcards.length, 'flashcards');
+  } catch (err) {
+    console.error('❌ Error loading flashcards:', err);
+    alert("Failed to load flashcards.");
+  }
+
+  function createFlashcardInput(term = "", definition = "", id = null) {
+    const cardDiv = document.createElement("div");
+    cardDiv.className = "flashcard-input glass";
+    if (id) cardDiv.dataset.cardId = id;
+
+    cardDiv.innerHTML = `
+      <div class="form__group">
+        <label class="form__label">Term</label>
+        <input type="text" class="form__input flashcard-term" value="${term}" placeholder="Enter term" required>
+      </div>
+      <div class="form__group">
+        <label class="form__label">Definition</label>
+        <textarea class="form__input flashcard-definition" rows="3" placeholder="Enter definition" required>${definition}</textarea>
+      </div>
+      <button type="button" class="btn btn--secondary remove-flashcard">Remove</button>
+    `;
+    
+    cardDiv.querySelector(".remove-flashcard").addEventListener("click", () => {
+      if (confirm('Remove this flashcard?')) {
+        cardDiv.remove();
+      }
+    });
+    
+    flashcardContainer.appendChild(cardDiv);
+  }
+
+  // Load existing flashcards or create one empty card
+  if (flashcards.length > 0) {
+    flashcards.forEach(fc => createFlashcardInput(fc.term, fc.definition, fc.id));
+  } else {
+    createFlashcardInput();
+  }
+
+  // Add another flashcard
+  addAnotherFlashcard.addEventListener("click", () => createFlashcardInput());
+
+  // Save all flashcards
+  finishFlashcardsBtn.addEventListener("click", async () => {
+    const updatedCards = [];
+    
+    document.querySelectorAll(".flashcard-input").forEach(block => {
+      const term = block.querySelector(".flashcard-term").value.trim();
+      const definition = block.querySelector(".flashcard-definition").value.trim();
+      const id = block.dataset.cardId ? Number(block.dataset.cardId) : null;
+      
+      if (term && definition) {
+        updatedCards.push({ id, term, definition });
+      }
+    });
+
+    if (updatedCards.length === 0) {
+      alert("Please add at least one flashcard.");
+      return;
+    }
+
+    try {
+      // ✅ FIXED: Use API_CONFIG to save flashcards
+      const res = await fetch(API_CONFIG.ENDPOINTS.BULK_FLASHCARDS(deckId), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flashcards: updatedCards }),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to save flashcards.");
+      }
+
+      console.log('✅ Flashcards saved successfully');
+      alert("Flashcards saved successfully!");
+      window.location.href = "library-ongoing.html";
+    } catch (err) {
+      console.error('❌ Error saving flashcards:', err);
+      alert("Error saving flashcards. Please try again.");
+    }
+  });
+
+  // Coming soon features
+  document.querySelectorAll('.coming-soon').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Feature coming soon!');
+    });
+  });
+});
+</script>
+
+</body>
+</html>

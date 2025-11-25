@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recallr Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manjari:wght@100;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="signup.css" />
+</head>
+<body>
+  <!-- Background Component -->
+  <div class="background"></div>
+
+  <!-- Animated Blur Circles Component -->
+  <div class="blur-circles">
+    <div class="blur-circle"></div>
+    <div class="blur-circle"></div>
+    <div class="blur-circle"></div>
+    <div class="blur-circle"></div>
+  </div>
+
+  <!-- Signup Container -->
+  <div class="signup-container">
+    <!-- Glass Card Component -->
+    <div class="glass-card">
+      <!-- Header Component -->
+      <header class="signup-header">
+        <h1 class="signup-header__logo">Recallr</h1>
+        <h2 class="signup-header__title">Create Account</h2>
+      </header>
+
+      <!-- Form Component -->
+      <form class="signup-form" id="signupForm">
+        <!-- Username Input Group -->
+        <div class="input-group">
+          <label class="input-label" for="username">Username</label>
+          <input 
+            type="text" 
+            class="input-field" 
+            id="username"
+            placeholder="Username"
+            required
+            minlength="3"
+          >
+          <div class="error-message" id="usernameError"></div>
+        </div>
+
+        <!-- Email Input Group -->
+        <div class="input-group">
+          <label class="input-label" for="email">Email</label>
+          <input 
+            type="email" 
+            class="input-field" 
+            id="email"
+            placeholder="Email"
+            required
+          >
+          <div class="error-message" id="emailError"></div>
+        </div>
+
+        <!-- Password Input Group -->
+        <div class="input-group">
+          <label class="input-label" for="password">Password</label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              class="input-field" 
+              id="password"
+              placeholder="Password"
+              required
+              minlength="8"
+            >
+            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
+              🔓
+            </button>
+          </div>
+          <div class="password-strength" id="passwordStrength">
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+            <div class="strength-bar"></div>
+          </div>
+          <div class="password-hint">At least 8 characters</div>
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <!-- Confirm Password Input Group -->
+        <div class="input-group">
+          <label class="input-label" for="confirmPassword">Confirm Password</label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              class="input-field" 
+              id="confirmPassword"
+              placeholder="Confirm Password"
+              required
+            >
+            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+              🔓
+            </button>
+          </div>
+          <div class="error-message" id="confirmError"></div>
+        </div>
+
+        <!-- Submit Button Component -->
+        <button type="submit" class="btn-primary">Sign-up</button>
+      </form>
+
+      <!-- Footer Component -->
+      <footer class="signup-footer">
+        <p class="login-text">
+          Already have an account? <a href="login.html" class="login-link">Login</a>
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ✅ IMPORTANT: Load config.js FIRST -->
+  <script src="./config.js"></script>
+  
+  <script>
+    // ==========================
+    // Toggle password visibility
+    // ==========================
+    function togglePassword(fieldId, btn) {
+      const input = document.getElementById(fieldId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🔒';
+      } else {
+        input.type = 'password';
+        btn.textContent = '🔓';
+      }
+    }
+
+    // ==========================
+    // Password strength checker
+    // ==========================
+    const passwordInput = document.getElementById('password');
+    const strengthBars = document.querySelectorAll('.strength-bar');
+
+    passwordInput.addEventListener('input', (e) => {
+      const password = e.target.value;
+      const strength = checkPasswordStrength(password);
+
+      strengthBars.forEach(bar => {
+        bar.classList.remove('strength-bar--active', 'strength-bar--weak', 'strength-bar--medium', 'strength-bar--strong');
+      });
+
+      if (strength > 0) {
+        const strengthClass = strength <= 1 ? 'strength-bar--weak' : 
+                             strength <= 2 ? 'strength-bar--medium' : 
+                             'strength-bar--strong';
+
+        for (let i = 0; i < strength; i++) {
+          strengthBars[i].classList.add('strength-bar--active', strengthClass);
+        }
+      }
+    });
+
+    function checkPasswordStrength(password) {
+      let strength = 0;
+      if (password.length >= 8) strength++;
+      if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+      if (password.match(/\d/)) strength++;
+      if (password.match(/[^a-zA-Z\d]/)) strength++;
+      return strength;
+    }
+
+    // ==========================
+    // Helper: show error messages
+    // ==========================
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      errorElement.textContent = message;
+      errorElement.classList.add('error-message--visible');
+    }
+
+    // ==========================
+    // Form submission - FIXED
+    // ==========================
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Clear previous errors
+      document.querySelectorAll('.error-message').forEach(msg => {
+        msg.classList.remove('error-message--visible');
+        msg.textContent = '';
+      });
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      let isValid = true;
+
+      // Username validation
+      if (username.length < 3) {
+        showError('usernameError', 'Username must be at least 3 characters');
+        isValid = false;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError('emailError', 'Please enter a valid email address');
+        isValid = false;
+      }
+
+      // Password validation
+      if (password.length < 8) {
+        showError('passwordError', 'Password must be at least 8 characters');
+        isValid = false;
+      }
+
+      if (password !== confirmPassword) {
+        showError('confirmError', 'Passwords do not match');
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      // ==========================
+      // Submit to backend - FIXED
+      // ==========================
+      try {
+        // ✅ FIXED: Use API_CONFIG
+        const response = await fetch(API_CONFIG.ENDPOINTS.SIGNUP, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password, confirmPassword })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          console.error('❌ Signup error:', result);
+          alert(result.message || 'Signup failed.');
+          return;
+        }
+
+        console.log('✅ Signup successful:', result);
+
+        // Store user data
+        if (result.userId && result.username) {
+          localStorage.setItem('userId', result.userId);
+          localStorage.setItem('username', result.username);
+        }
+
+        alert(result.message || 'Signup successful!');
+        window.location.href = 'dashboard.html';
+
+      } catch (err) {
+        console.error('❌ Signup error:', err);
+        alert('Error connecting to server. Please check your internet connection.');
+      }
+    });
+
+    // ==========================
+    // Real-time validations
+    // ==========================
+
+    // Email validation on blur
+    document.getElementById('email').addEventListener('blur', (e) => {
+      const email = e.target.value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const errorElement = document.getElementById('emailError');
+
+      if (email && !emailRegex.test(email)) {
+        showError('emailError', 'Please enter a valid email address');
+      } else {
+        errorElement.classList.remove('error-message--visible');
+      }
+    });
+
+    // Confirm password matches
+    document.getElementById('confirmPassword').addEventListener('input', (e) => {
+      const password = document.getElementById('password').value;
+      const confirmPassword = e.target.value;
+      const errorElement = document.getElementById('confirmError');
+
+      if (confirmPassword && password !== confirmPassword) {
+        showError('confirmError', 'Passwords do not match');
+      } else {
+        errorElement.classList.remove('error-message--visible');
+      }
+    });
+  </script>
+</body>
+</html>
