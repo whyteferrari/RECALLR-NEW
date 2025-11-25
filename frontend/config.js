@@ -2,7 +2,7 @@
 // ==================
 
 // 🔧 UPDATE THIS URL after deploying to Render
-const BACKEND_URL = 'https://recallr-new.onrender.com/'; // Change to your Render URL: 'https://recallr-backend.onrender.com'
+const BACKEND_URL = 'https://recallr-backend-53s9.onrender.com/'; // Change to your Render URL: 'https://recallr-backend.onrender.com'
 
 // Detect if we're in development (localhost) or production
 const isDevelopment = window.location.hostname === 'localhost' || 
