@@ -2,7 +2,7 @@
 // ==================
 
 // 🔧 UPDATE THIS URL after deploying to Render
-const BACKEND_URL = 'http://localhost:3000'; // Change to your Render URL: 'https://recallr-backend.onrender.com'
+const BACKEND_URL = 'https://recallr-new.onrender.com/'; // Change to your Render URL: 'https://recallr-backend.onrender.com'
 
 // Detect if we're in development (localhost) or production
 const isDevelopment = window.location.hostname === 'localhost' || 
@@ -12,7 +12,7 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 // Use localhost for development, Render URL for production
 const API_BASE_URL = isDevelopment 
   ? 'http://localhost:3000'  // Local development
-  : 'https://recallr-backend.onrender.com';  // 🔧 UPDATE THIS after deployment
+  : 'https://funny-syrniki-4806f1.netlify.app/';  // 🔧 UPDATE THIS after deployment
 
 // Export configuration
 const API_CONFIG = {

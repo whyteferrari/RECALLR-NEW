@@ -4,8 +4,14 @@ const bcrypt = require("bcryptjs");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'https://funny-syrniki-4806f1.netlify.app/',  // ← Put your actual Netlify URL here
+  ],
+  credentials: true
+}));app.use(express.json());
 
 // =====================
 // DATABASE CONNECTION
